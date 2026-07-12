@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Empirica — logo picker</title>
+<style>
+  :root{--or:#E8641E;--ink:#161310;--pan:#211d18;--line:#332d26;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:#eee;
+       font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+  header{padding:22px 28px 10px;position:sticky;top:0;background:linear-gradient(var(--ink),var(--ink) 78%,transparent);z-index:5}
+  h1{margin:0 0 6px;font-size:19px}h1 b{color:var(--or)}
+  .controls{display:flex;gap:16px;align-items:center;flex-wrap:wrap;font-size:13px;color:#c9c2b8}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .seg button{background:transparent;color:#c9c2b8;border:0;padding:6px 14px;cursor:pointer;font:inherit}
+  .seg button.on{background:var(--or);color:#1a1a1a;font-weight:700}
+  input.round{width:52px;background:var(--pan);border:1px solid var(--line);color:#eee;border-radius:6px;padding:5px 8px}
+  h2{margin:26px 28px 2px;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:var(--or)}
+  .note-sec{margin:0 28px 10px;color:#8f887e;font-size:12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;padding:6px 28px}
+  .card{background:#fff;border-radius:12px;overflow:hidden;border:2px solid var(--line);cursor:pointer;
+        position:relative;transition:border-color .12s,transform .12s}
+  .card:hover{transform:translateY(-2px)}
+  .card.sel{border-color:var(--or);box-shadow:0 0 0 3px rgba(232,100,30,.25)}
+  .card img{width:100%;aspect-ratio:1/1;object-fit:contain;display:block;background:#fff;pointer-events:none}
+  .card .lbl{padding:6px 10px;font-size:11.5px;color:#444;background:#faf7f2;border-top:1px solid #eee;
+             white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card .tick{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;
+              background:var(--or);color:#fff;display:none;align-items:center;justify-content:center;font-weight:800;font-size:14px}
+  .card.sel .tick{display:flex}
+  .card textarea{display:none;width:100%;border:0;border-top:1px solid #eee;padding:8px 10px;font:12.5px inherit;
+                 resize:vertical;min-height:56px;background:#fffdf9;color:#222}
+  .card.sel textarea{display:block}
+  /* action bar */
+  .bar{position:fixed;bottom:0;left:0;right:0;background:var(--pan);border-top:1px solid var(--line);
+       padding:12px 28px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;z-index:10}
+  .bar textarea{flex:1;min-width:220px;background:var(--ink);border:1px solid var(--line);color:#eee;border-radius:8px;
+                padding:8px 10px;font:13px inherit;resize:vertical;min-height:42px}
+  .bar .count{color:var(--or);font-weight:700;white-space:nowrap}
+  .btn{background:var(--or);color:#1a1a1a;border:0;border-radius:8px;padding:9px 16px;font:700 13px inherit;cursor:pointer;white-space:nowrap}
+  .btn.ghost{background:transparent;color:#c9c2b8;border:1px solid var(--line)}
+  body{padding-bottom:130px}
+  .toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%);background:var(--or);color:#1a1a1a;
+         padding:10px 18px;border-radius:10px;font-weight:700;display:none;z-index:20}
+  dialog{background:var(--pan);color:#eee;border:1px solid var(--line);border-radius:12px;max-width:640px;width:92%}
+  dialog textarea{width:100%;height:280px;background:var(--ink);color:#eee;border:1px solid var(--line);border-radius:8px;padding:10px;font:12.5px ui-monospace,monospace}
+  dialog .row{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}
+</style>
+</head>
+<body>
+<header>
+  <h1><b>Empirica</b> · logo picker <span style="color:#8f887e;font-weight:400">— tap the ones you like, add a note, export</span></h1>
+  <div class="controls">
+    <span>I am:</span>
+    <span class="seg" id="who">
+      <button data-who="Philipp" class="on">Philipp</button>
+      <button data-who="David">David</button>
+    </span>
+    <span>Round <input class="round" id="round" value="4"></span>
+    <span style="color:#8f887e">Selections auto-save in your browser. Tap a card to select · type what you like/change · then <b style="color:var(--or)">Copy feedback</b> and paste it back to Claude.</span>
+  </div>
+</header>
+<div id="app"></div>
+
+<div class="bar">
+  <span class="count" id="count">0 selected</span>
+  <textarea id="overall" placeholder="Overall direction notes (optional): e.g. 'go more premium, keep the molten orange, the nautilus facets are the vibe...'"></textarea>
+  <button class="btn" id="copy">Copy feedback</button>
+  <button class="btn ghost" id="download">Download .json</button>
+  <button class="btn ghost" id="clear">Clear</button>
+</div>
+<div class="toast" id="toast">Copied ✓</div>
+
+<dialog id="dlg">
+  <div style="margin-bottom:8px">Copy this and paste it back to Claude:</div>
+  <textarea id="dlgtext" readonly></textarea>
+  <div class="row"><button class="btn" id="dlgcopy">Copy</button><button class="btn ghost" id="dlgclose">Close</button></div>
+</dialog>
+
+<script>
+const SECTIONS=[
+ {t:'★ Distinctive / premium (newest)', n:'Dimensional, crafted, signature details.', items:[
+   ['dist-02-nautilus.png','Nautilus (jewel-faceted)'],['dist-08-knot-flame.png','Spiral + flame tail'],
+   ['dist-04-sculptural.png','Sculptural ∞ (metal)'],['dist-01-mobius.png','Möbius ∞-spiral'],
+   ['dist-06-aperture-vortex.png','Aperture vortex'],['dist-07-interlocked.png','Interlocked ∞'],
+   ['dist-03-hidden-E.png','Hidden-E swirl'],['dist-05-seal.png','Trust seal'],
+ ]},
+ {t:'Tech-geometric', n:'OpenAI/Grok register, flat + favicon-true.', items:[
+   ['tech-A-infinity-spiral.png','∞-spiral monoline'],['tech-E2-aperture-eye.png','Aperture-eye'],
+   ['tech-D2-bars-ring.png','Bars + ring'],['tech-B2-ring-notch.png','Ring + spiral seal'],
+   ['tech-A2-infinity.png','∞ bold'],['tech-E-aperture.png','Aperture solid'],
+   ['tech-C2-knot-spiral.png','Knot-spiral'],['tech-B-ring-spiral.png','Ring + spiral'],
+   ['tech-C-knot.png','Trefoil knot'],['tech-D-gauge.png','Gauge / dial'],
+ ]},
+ {t:'Spiral / enso (David’s direction)', n:'Brush-style molten orange.', items:[
+   ['spiral-06-continuous-gesture.png','Enso + flame tail'],['spiral-03-3rays-koru.png','Enso + 3 rays'],
+   ['spiral-05-segmented-gradient.png','Heritage segmented'],['spiral-09-seed-heritage.png','Seed / teardrop'],
+   ['spiral-07-twotone-charcoal.png','Two-tone rays'],['spiral-01-koru-pure.png','Bold koru'],
+   ['spiral-10-32px-minimal.png','32px minimal'],['spiral-08-ammonite.png','Ammonite'],
+   ['spiral-04-2rays-eye.png','Brushy “e”'],['spiral-02-eye-pure.png','Spiral-eye'],
+ ]},
+ {t:'First concepts (measurement bars / E)', n:'The projct bar-mark DNA.', items:[
+   ['09-app-badge.png','App badge'],['04-tally.png','Tally'],['07-wordmark-lockup.png','Wordmark lockup'],
+   ['02-rising-gauge.png','Rising gauge'],['01-equalizer-E.png','Equalizer-E'],['08-barcode-scale.png','Barcode-E'],
+   ['03-the-gate.png','The gate'],['10-confidence-dial.png','Confidence dial'],['06-divergence.png','Divergence'],
+   ['05-deboss-E.png','Deboss-E'],
+ ]},
+ {t:'EAI embossed', n:'EAI collides with “Enterprise Application Integration.”', items:[
+   ['eai-04-terracotta-A.png','EAI terracotta A'],['eai-02-geometric-sans.png','EAI geometric'],
+   ['eai-01-constructed-bars.png','EAI constructed'],['eai-03-monogram.png','EAI monogram'],
+ ]},
+];
+const labels={}; SECTIONS.forEach(s=>s.items.forEach(([f,l])=>labels[f]=l));
+
+let who='Philipp';
+const keyFor=w=>'empirica_picker_'+w;
+function load(){ try{return JSON.parse(localStorage.getItem(keyFor(who)))||{sel:{},overall:'',round:'4'}}catch(e){return {sel:{},overall:'',round:'4'}} }
+function save(st){ localStorage.setItem(keyFor(who), JSON.stringify(st)); }
+let state=load();
+
+const app=document.getElementById('app');
+function render(){
+  app.innerHTML='';
+  for(const s of SECTIONS){
+    const h=document.createElement('h2');h.textContent=s.t;app.appendChild(h);
+    const n=document.createElement('div');n.className='note-sec';n.textContent=s.n;app.appendChild(n);
+    const g=document.createElement('div');g.className='grid';
+    for(const [f,l] of s.items){
+      const sel = f in state.sel;
+      const c=document.createElement('div');c.className='card'+(sel?' sel':'');c.dataset.file=f;
+      c.innerHTML=`<div class="tick">✓</div><img src="${f}" alt="${l}" loading="lazy"><div class="lbl">${l}</div>`+
+                  `<textarea placeholder="what you like / want changed about this one...">${sel?(state.sel[f]||''):''}</textarea>`;
+      const ta=c.querySelector('textarea');
+      ta.addEventListener('click',e=>e.stopPropagation());
+      ta.addEventListener('input',()=>{ if(f in state.sel){ state.sel[f]=ta.value; save(state);} });
+      c.addEventListener('click',()=>{
+        if(f in state.sel){ delete state.sel[f]; c.classList.remove('sel'); }
+        else { state.sel[f]=''; c.classList.add('sel'); c.querySelector('textarea').focus(); }
+        save(state); updateCount();
+      });
+      g.appendChild(c);
+    }
+    app.appendChild(g);
+  }
+  document.getElementById('overall').value=state.overall||'';
+  document.getElementById('round').value=state.round||'4';
+  updateCount();
+}
+function updateCount(){ document.getElementById('count').textContent=Object.keys(state.sel).length+' selected'; }
+
+document.getElementById('who').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  document.querySelectorAll('#who button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); who=b.dataset.who; state=load(); render();
+});
+document.getElementById('overall').addEventListener('input',e=>{state.overall=e.target.value;save(state);});
+document.getElementById('round').addEventListener('input',e=>{state.round=e.target.value;save(state);});
+
+function buildFeedback(){
+  const files=Object.keys(state.sel);
+  let out=`=== EMPIRICA LOGO FEEDBACK ===\nFrom: ${who}  |  Round: ${state.round||'?'}\n\nSELECTED (${files.length}):\n`;
+  if(!files.length) out+='(none selected)\n';
+  files.forEach(f=>{ out+=`- ${f} [${labels[f]||''}]: ${state.sel[f]?state.sel[f]:'(no note)'}\n`; });
+  out+=`\nOVERALL DIRECTION:\n${state.overall||'(none)'}\n`;
+  return out;
+}
+const toast=document.getElementById('toast');
+function showToast(m){toast.textContent=m;toast.style.display='block';setTimeout(()=>toast.style.display='none',1400);}
+const dlg=document.getElementById('dlg');
+document.getElementById('copy').addEventListener('click',async()=>{
+  const txt=buildFeedback();
+  try{ await navigator.clipboard.writeText(txt); showToast('Copied ✓ — paste it to Claude'); }
+  catch(e){ document.getElementById('dlgtext').value=txt; dlg.showModal(); }
+});
+document.getElementById('dlgcopy').addEventListener('click',async()=>{
+  const t=document.getElementById('dlgtext'); t.select();
+  try{await navigator.clipboard.writeText(t.value);}catch(e){document.execCommand('copy');}
+  showToast('Copied ✓');
+});
+document.getElementById('dlgclose').addEventListener('click',()=>dlg.close());
+document.getElementById('download').addEventListener('click',()=>{
+  const data={who,round:state.round,selected:state.sel,overall:state.overall};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`empirica-feedback-${who}-r${state.round||'x'}.json`;a.click();
+});
+document.getElementById('clear').addEventListener('click',()=>{
+  if(confirm('Clear your selections and notes?')){ state={sel:{},overall:'',round:state.round}; save(state); render(); }
+});
+render();
+</script>
+</body>
+</html>

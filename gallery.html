@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Empirica — logo gallery (all candidates)</title>
+<style>
+  :root{--or:#E8641E;--ink:#161310;--cream:#F4EFE6;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:#eee;
+       font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+  header{padding:26px 32px 6px}
+  h1{margin:0;font-size:20px}h1 b{color:var(--or)}
+  .sub{color:#9a9views;color:#9a938a;max-width:900px}
+  h2{margin:30px 32px 2px;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--or)}
+  .note{margin:0 32px 12px;color:#8f887e;font-size:12.5px;max-width:900px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;padding:8px 32px 8px}
+  .card{background:#fff;border-radius:12px;overflow:hidden;border:1px solid #2a2621}
+  .card img{width:100%;aspect-ratio:1/1;object-fit:contain;display:block;background:#fff}
+  .card .lbl{padding:7px 10px;font-size:11.5px;color:#444;background:#faf7f2;border-top:1px solid #eee;
+             white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  footer{padding:26px 32px 70px;color:#8f887e;max-width:900px}
+  .star{color:var(--or);font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <h1><b>Empirica</b> · logo gallery <span style="color:#8f887e;font-weight:400">— every candidate, newest first</span></h1>
+  <p class="note">This is everything I've generated. The <b>Distinctive / premium</b> row (top) is the newest, aimed at your "special, not simple" note. Click any image to open it full-size. Files live in this same folder.</p>
+</header>
+<div id="app"></div>
+<footer>Tell me the 2–3 that have a spark (even a detail you like) and I'll take those into a focused refinement + a clean production vector. Everything here is a direction, not the final.</footer>
+<script>
+const sections=[
+ {t:'★ Distinctive / premium (newest)', n:'Aimed at "special, not simple" — dimensional, crafted, signature details.', items:[
+   ['dist-02-nautilus.png','Nautilus (jewel-faceted) ★'],
+   ['dist-08-knot-flame.png','Spiral + flame tail ★'],
+   ['dist-04-sculptural.png','Sculptural ∞ (brushed metal) ★'],
+   ['dist-01-mobius.png','Möbius ∞-spiral'],
+   ['dist-06-aperture-vortex.png','Aperture vortex'],
+   ['dist-07-interlocked.png','Interlocked ∞ loops'],
+   ['dist-03-hidden-E.png','Hidden-E swirl'],
+   ['dist-05-seal.png','Trust seal / medallion'],
+ ]},
+ {t:'Tech-geometric', n:'OpenAI/Grok register — flat, geometric, favicon-true.', items:[
+   ['tech-A-infinity-spiral.png','∞-spiral (monoline)'],
+   ['tech-E2-aperture-eye.png','Aperture-eye (on black)'],
+   ['tech-D2-bars-ring.png','Measurement bars + ring'],
+   ['tech-B2-ring-notch.png','Ring + spiral seal'],
+   ['tech-A2-infinity.png','∞ bold (on black)'],
+   ['tech-E-aperture.png','Aperture (solid)'],
+   ['tech-C2-knot-spiral.png','Knot-spiral'],
+   ['tech-B-ring-spiral.png','Ring + spiral'],
+   ['tech-C-knot.png','Trefoil knot'],
+   ['tech-D-gauge.png','Gauge / dial'],
+ ]},
+ {t:'Spiral / enso (David’s direction)', n:'Brush-style, molten orange — the heritage track.', items:[
+   ['spiral-06-continuous-gesture.png','Enso + flame tail'],
+   ['spiral-03-3rays-koru.png','Enso + 3 rays'],
+   ['spiral-05-segmented-gradient.png','Heritage segmented rays'],
+   ['spiral-09-seed-heritage.png','Seed / teardrop'],
+   ['spiral-07-twotone-charcoal.png','Two-tone charcoal rays'],
+   ['spiral-01-koru-pure.png','Bold koru'],
+   ['spiral-10-32px-minimal.png','32px minimal'],
+   ['spiral-08-ammonite.png','Ammonite + rays'],
+   ['spiral-04-2rays-eye.png','Brushy “e”'],
+   ['spiral-02-eye-pure.png','Spiral-eye'],
+ ]},
+ {t:'First concepts (measurement bars / E)', n:'The original direction — the projct bar-mark DNA.', items:[
+   ['09-app-badge.png','App badge'],
+   ['04-tally.png','Tally'],
+   ['07-wordmark-lockup.png','Wordmark lockup'],
+   ['02-rising-gauge.png','Rising gauge'],
+   ['01-equalizer-E.png','Equalizer-E'],
+   ['08-barcode-scale.png','Barcode-E'],
+   ['03-the-gate.png','The gate'],
+   ['10-confidence-dial.png','Confidence dial'],
+   ['06-divergence.png','Divergence'],
+   ['05-deboss-E.png','Deboss-E'],
+ ]},
+ {t:'EAI embossed (explored, then set aside)', n:'EAI collides with “Enterprise Application Integration.”', items:[
+   ['eai-04-terracotta-A.png','EAI terracotta A'],
+   ['eai-02-geometric-sans.png','EAI geometric'],
+   ['eai-01-constructed-bars.png','EAI constructed'],
+   ['eai-03-monogram.png','EAI monogram'],
+ ]},
+];
+const app=document.getElementById('app');
+for(const s of sections){
+  const h=document.createElement('h2');h.textContent=s.t;app.appendChild(h);
+  const nn=document.createElement('p');nn.className='note';nn.textContent=s.n;app.appendChild(nn);
+  const g=document.createElement('div');g.className='grid';
+  for(const [f,l] of s.items){
+    const a=document.createElement('a');a.href=f;a.target='_blank';a.className='card';
+    a.innerHTML=`<img src="${f}" alt="${l}" loading="lazy"><div class="lbl">${l}</div>`;
+    g.appendChild(a);
+  }
+  app.appendChild(g);
+}
+</script>
+</body>
+</html>
