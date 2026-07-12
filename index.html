@@ -187,7 +187,7 @@ function render(){
     app.appendChild(g);
   }
   document.getElementById('overall').value=state.overall||'';
-  document.getElementById('round').value=state.round||'4';
+  document.getElementById('round').value=String(VERSION);
   updateCount();
 }
 function updateCount(){ document.getElementById('count').textContent=Object.keys(state.sel).length+' selected'; }
@@ -223,6 +223,8 @@ document.getElementById('submit').addEventListener('click',async()=>{
   btn.textContent=lab;
 });
 const READY='https://ntfy.sh/empirica-logo-ready-x7k2m9q4';
+const VERSION=8;
+setInterval(async()=>{ try{ const r=await fetch('index.html?cb='+Date.now(),{cache:'no-store'}); const m=(await r.text()).match(/VERSION=(\d+)/); if(m && +m[1]>VERSION) location.reload(); }catch(e){} },20000);
 const JOKES=[
   "Honestly? I'd have picked a different one. But you're the boss. 🫡",
   "Your note made zero sense. Doing it anyway. 😌",
