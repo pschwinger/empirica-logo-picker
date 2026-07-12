@@ -43,6 +43,14 @@
   body{padding-bottom:130px}
   .toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%);background:var(--or);color:#1a1a1a;
          padding:10px 18px;border-radius:10px;font-weight:700;display:none;z-index:20}
+  .wait{position:fixed;inset:0;background:rgba(15,13,11,.94);display:none;align-items:center;justify-content:center;z-index:100}
+  .wbox{max-width:520px;text-align:center;padding:32px}
+  .wspin{width:54px;height:54px;margin:0 auto 22px;border:5px solid #3a332b;border-top-color:var(--or);border-radius:50%;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .wtitle{font-size:20px;font-weight:700;color:#fff}
+  .wtimer{font-size:44px;font-weight:800;color:var(--or);font-variant-numeric:tabular-nums;margin:6px 0 14px}
+  .wjoke{font-size:15px;color:#d8cfc2;min-height:44px;font-style:italic}
+  .wsub{font-size:12.5px;color:#8f887e;margin:16px 0 20px}
   dialog{background:var(--pan);color:#eee;border:1px solid var(--line);border-radius:12px;max-width:640px;width:92%}
   dialog textarea{width:100%;height:280px;background:var(--ink);color:#eee;border:1px solid var(--line);border-radius:8px;padding:10px;font:12.5px ui-monospace,monospace}
   dialog .row{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}
@@ -72,6 +80,16 @@
   <button class="btn ghost" id="clear">Clear</button>
 </div>
 <div class="toast" id="toast">Copied ✓</div>
+<div class="wait" id="wait">
+  <div class="wbox">
+    <div class="wspin"></div>
+    <div class="wtitle">Cooking your next round…</div>
+    <div class="wtimer" id="wtimer">1:30</div>
+    <div class="wjoke" id="wjoke"></div>
+    <div class="wsub">This page refreshes itself the second it's ready — you don't have to do anything.</div>
+    <button class="btn ghost" onclick="cancelWait()">Keep browsing meanwhile</button>
+  </div>
+</div>
 
 <dialog id="dlg">
   <div style="margin-bottom:8px">Copy this and paste it back to Claude:</div>
@@ -81,7 +99,13 @@
 
 <script>
 const SECTIONS=[
- {t:'★ Distinctive / premium (newest)', n:'Dimensional, crafted, signature details.', items:[
+ {t:'★ Round 5 — seal variations (your pick)', n:'From your submit on dist-05: some WITH the shield/crest, some inner-glyph only.', items:[
+   ['seal-01-shield-refined.png','Shield · refined'],['seal-03-shield-gradient.png','Shield · gradient'],
+   ['seal-02-shield-flat.png','Shield · flat/cream'],['seal-04-shield-minimal.png','Shield · minimal'],
+   ['seal-05-glyph-refined.png','Glyph only · refined'],['seal-07-glyph-spiral-tail.png','Glyph · spiral+tail'],
+   ['seal-06-glyph-flat.png','Glyph · flat/cream'],['seal-08-glyph-teardrop.png','Glyph · teardrop'],
+ ]},
+ {t:'★ Distinctive / premium', n:'Dimensional, crafted, signature details.', items:[
    ['dist-02-nautilus.png','Nautilus (jewel-faceted)'],['dist-08-knot-flame.png','Spiral + flame tail'],
    ['dist-04-sculptural.png','Sculptural ∞ (metal)'],['dist-01-mobius.png','Möbius ∞-spiral'],
    ['dist-06-aperture-vortex.png','Aperture vortex'],['dist-07-interlocked.png','Interlocked ∞'],
@@ -176,10 +200,41 @@ document.getElementById('submit').addEventListener('click',async()=>{
   const btn=document.getElementById('submit'), lab=btn.textContent; btn.textContent='Sending…';
   try{
     await fetch(NTFY,{method:'POST',body:JSON.stringify(buildObj())});
-    showToast('Submitted ✓ — Claude will generate '+who+'’s next round');
+    startWait();
   }catch(e){ showToast('Submit failed — use Copy as backup'); }
   btn.textContent=lab;
 });
+const READY='https://ntfy.sh/empirica-logo-ready-x7k2m9q4';
+const JOKES=[
+  "Honestly? I'd have picked a different one. But you're the boss. 🫡",
+  "Your note made zero sense. Doing it anyway. 😌",
+  "Consulting 400 billion parameters to draw a small orange squiggle.",
+  "Fun fact: the first computer 'bug' (1947) was a literal moth. Yours is my taste in logos.",
+  "'nano banana' is a real AI image model. I wish I were joking.",
+  "If this round is bad, we blame the prompt. (The prompt was mine.)",
+  "Reticulating spirals…",
+  "You said 'do some variations.' I did eight. Overachiever, me.",
+  "An octopus has three hearts. I have zero — that's why I'm objective about your logo.",
+  "Warming up the molten orange. The only colour you're allowed now.",
+  "90% of design is nodding while someone says 'make it pop'. Nodding.",
+  "Somewhere a GPU is drawing your logo AND making a grilled cheese. Both nearly done.",
+  "Bribing the pixels. They drive a hard bargain.",
+  "The AI is arguing with itself about where the eye goes. Democracy is slow."
+];
+let wT,wJ,wES;
+function startWait(){
+  const o=document.getElementById('wait'); o.style.display='flex';
+  const tn=document.getElementById('wtimer'), jk=document.getElementById('wjoke');
+  const setj=()=>{ jk.textContent=JOKES[Math.floor(Math.random()*JOKES.length)]; }; setj();
+  const mm=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  let t=90; clearInterval(wT); clearInterval(wJ);
+  tn.textContent=mm(t);
+  wT=setInterval(()=>{ t--; tn.textContent = t>0 ? mm(t) : 'any second now…'; },1000);
+  wJ=setInterval(setj,5000);
+  try{ wES&&wES.close(); wES=new EventSource(READY+'/sse');
+    wES.onmessage=(e)=>{ try{ if(JSON.parse(e.data).event==='message') location.reload(); }catch(_){}}; }catch(e){}
+}
+function cancelWait(){ document.getElementById('wait').style.display='none'; clearInterval(wT); clearInterval(wJ); try{wES&&wES.close()}catch(_){}}
 document.getElementById('copy').addEventListener('click',async()=>{
   const txt=buildFeedback();
   try{ await navigator.clipboard.writeText(txt); showToast('Copied ✓ — paste it to Claude'); }
