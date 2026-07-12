@@ -65,7 +65,7 @@
       <button data-who="Philipp" class="on">Philipp</button>
       <button data-who="David">David</button>
     </span>
-    <span>Round <input class="round" id="round" value="4"></span>
+    <span>Round <input class="round" id="round" value="9"></span>
     <span style="color:#8f887e">Tap cards to select · type notes · then hit <b style="color:var(--or)">Submit picks → next round</b>. Works for both of you — pick your name above; Claude receives it directly (no copy-paste needed).</span>
   </div>
 </header>
@@ -99,6 +99,13 @@
 
 <script>
 const SECTIONS=[
+ {t:'★ Round 9: split-letter system (red E) + yin-yang', n:'From your r7-06 note: "the unnatural way it is split up, try it with ALL letters, has to be a TRUE logo, looks good big or small, b&w or colored." Plus dist-05 "some like yin-yang." The .svg marks are REAL vectors: they scale flawlessly and work in pure black & white. The embossed one shows the premium feel. Tell me which split-geometry wins.', items:[
+   ['r9-h1-emboss-split-E.png','E · embossed split ★'],['r9-s1-E-staggered.svg','E · staggered (vector)'],
+   ['r9-s2-E-sheared.svg','E · fault-shear (vector)'],['r9-s3-E-segmented.svg','E · segmented (vector)'],
+   ['r9-s4-E-bw.svg','E · black & white proof'],['r9-s6-favicon.svg','E · scales to 20px'],
+   ['r9-s5-wordmark.svg','"Empirica" wordmark'],['r9-h2-seal-yinyang.png','Seal · yin-yang'],
+   ['r9-h3-seal-core.png','Seal · carved core'],
+ ]},
  {t:'★ Round 8 — viking EAI + isolated', n:'"More viking, A & I like the E (not touching)" + shield-only + glyph-only.', items:[
    ['r8-01-viking-EAI.png','Viking EAI · carved'],['r8-02-viking-emboss.png','Viking EAI · emboss'],
    ['r8-04-viking-flat.png','Viking EAI · flat'],['r8-05-viking-sharp.png','Viking EAI · sharp'],
@@ -212,7 +219,7 @@ const toast=document.getElementById('toast');
 function showToast(m){toast.textContent=m;toast.style.display='block';setTimeout(()=>toast.style.display='none',2000);}
 const dlg=document.getElementById('dlg');
 const NTFY='https://ntfy.sh/empirica-logo-fb-x7k2m9q4';
-function buildObj(){return {who,round:state.round,ts:new Date().toISOString(),count:Object.keys(state.sel).length,selected:state.sel,overall:state.overall};}
+function buildObj(){return {who,round:String(VERSION),ts:new Date().toISOString(),count:Object.keys(state.sel).length,selected:state.sel,overall:state.overall};}
 document.getElementById('submit').addEventListener('click',async()=>{
   if(!Object.keys(state.sel).length && !(state.overall||'').trim()){ showToast('Select at least one card, or add a note'); return; }
   const btn=document.getElementById('submit'), lab=btn.textContent; btn.textContent='Sending…';
@@ -223,7 +230,7 @@ document.getElementById('submit').addEventListener('click',async()=>{
   btn.textContent=lab;
 });
 const READY='https://ntfy.sh/empirica-logo-ready-x7k2m9q4';
-const VERSION=8;
+const VERSION=9;
 setInterval(async()=>{ try{ const r=await fetch('index.html?cb='+Date.now(),{cache:'no-store'}); const m=(await r.text()).match(/VERSION=(\d+)/); if(m && +m[1]>VERSION) location.reload(); }catch(e){} },20000);
 const JOKES=[
   "Honestly? I'd have picked a different one. But you're the boss. 🫡",

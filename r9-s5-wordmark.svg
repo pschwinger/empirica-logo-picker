@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 72" width="240" height="72">
+  <rect width="240" height="72" fill="#F4EFE6"/>
+  <defs>
+    <text id="wm" x="18" y="50" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-weight="800" font-size="46" letter-spacing="-1.5"><tspan fill="#C0492F">E</tspan><tspan fill="#1A1A1A">mpirica</tspan></text>
+    <clipPath id="wtop"><rect x="-40" y="0" width="320" height="34"/></clipPath>
+    <clipPath id="wbot"><rect x="-40" y="34" width="320" height="38"/></clipPath>
+  </defs>
+  <use href="#wm" clip-path="url(#wbot)"/>
+  <use href="#wm" clip-path="url(#wtop)" transform="translate(5,0)"/>
+</svg>
