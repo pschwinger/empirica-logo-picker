@@ -99,7 +99,13 @@
 
 <script>
 const SECTIONS=[
- {t:'★ Round 5 — seal variations (your pick)', n:'From your submit on dist-05: some WITH the shield/crest, some inner-glyph only.', items:[
+ {t:'★ Round 6 — yin-yang + inner glyph', n:'Your "some like yin-yang" + isolated-glyph takes on the seal core.', items:[
+   ['yy-01-teardrop.png','Yin-yang · teardrops'],['yy-02-flames.png','Yin-yang · flames'],
+   ['yy-03-commas.png','Yin-yang · commas'],['yy-04-nautilus.png','Yin-yang · nautilus'],
+   ['yy-05-gradient.png','Yin-yang · gradient'],['r6-glyph-refined.png','Glyph · refined'],
+   ['r6-glyph-flat.png','Glyph · flat 2-tone'],['r6-glyph-monoline.png','Glyph · monoline'],
+ ]},
+ {t:'★ Round 5 — seal variations', n:'From your submit on dist-05: some WITH the shield/crest, some inner-glyph only.', items:[
    ['seal-01-shield-refined.png','Shield · refined'],['seal-03-shield-gradient.png','Shield · gradient'],
    ['seal-02-shield-flat.png','Shield · flat/cream'],['seal-04-shield-minimal.png','Shield · minimal'],
    ['seal-05-glyph-refined.png','Glyph only · refined'],['seal-07-glyph-spiral-tail.png','Glyph · spiral+tail'],
@@ -227,7 +233,7 @@ function startWait(){
   const tn=document.getElementById('wtimer'), jk=document.getElementById('wjoke');
   const setj=()=>{ jk.textContent=JOKES[Math.floor(Math.random()*JOKES.length)]; }; setj();
   const mm=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
-  let t=90; clearInterval(wT); clearInterval(wJ);
+  let t=180; clearInterval(wT); clearInterval(wJ);
   tn.textContent=mm(t);
   wT=setInterval(()=>{ t--; tn.textContent = t>0 ? mm(t) : 'any second now…'; },1000);
   wJ=setInterval(setj,5000);
